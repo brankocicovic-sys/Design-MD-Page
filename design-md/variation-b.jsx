@@ -1330,7 +1330,7 @@ function VANotificationsShowcase() {
 function VAPillTabs({ tabs, value, onChange }) {
   const [hovered, setHovered] = React.useState(null);
   return (
-    <div style={{ display: 'inline-flex', gap: 2, alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
       {tabs.map(t => {
         const active = t.key === value;
         const isHov = hovered === t.key && !active;
