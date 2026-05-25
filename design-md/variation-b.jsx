@@ -1366,7 +1366,7 @@ function VAComponents() {
       <VASectionHead n="06" id="components" kicker="Component Library" title="Twelve primitives. One blue."
         lede="Every screen reduces to a small set of primitives. Reuse aggressively. Build new ones only when the existing set truly doesn't cover the case." />
       <VAContainer>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
             {/* Buttons */}
             <div style={{ gridColumn: 'span 12', ...VA_CARD, padding: 28 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -1447,7 +1447,7 @@ function VAComponents() {
             </div>
 
             {/* Card */}
-            <div style={{ gridColumn: 'span 6', ...VA_CARD, padding: 28 }}>
+            <div style={{ gridColumn: isMobile ? 'span 12' : 'span 6', ...VA_CARD, padding: 28 }}>
               <h4 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 20px', color: VA_TOKENS.ink }}>Card · Work Order Line</h4>
               <Card>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
@@ -1462,7 +1462,7 @@ function VAComponents() {
             </div>
 
             {/* Avatar */}
-            <div style={{ gridColumn: 'span 6', ...VA_CARD, padding: 28 }}>
+            <div style={{ gridColumn: isMobile ? 'span 12' : 'span 6', ...VA_CARD, padding: 28 }}>
               <h4 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 20px', color: VA_TOKENS.ink }}>Avatar</h4>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <Avatar name="Sam Hill" size={40} />
