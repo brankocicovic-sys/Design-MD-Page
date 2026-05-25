@@ -16,8 +16,22 @@ const VA_CARD = {
   boxShadow: '0 1px 0 rgba(15,17,26,0.02), 0 1px 2px rgba(15,17,26,0.04)',
 };
 
+// Mobile-first breakpoint hook. Single resize listener per component;
+// we only need a binary mobile/desktop split for structural switches —
+// fluid type and grid columns handle the rest via clamp() and auto-fit.
+function useBP() {
+  const get = () => (typeof window !== 'undefined' && window.innerWidth < 720 ? 'mobile' : 'desktop');
+  const [bp, setBp] = React.useState(get);
+  React.useEffect(() => {
+    const onR = () => setBp(get());
+    window.addEventListener('resize', onR);
+    return () => window.removeEventListener('resize', onR);
+  }, []);
+  return bp;
+}
+
 function VAContainer({ children, narrow }) {
-  return <div style={{ maxWidth: narrow ? 860 : 1280, margin: '0 auto', padding: '0 64px' }}>{children}</div>;
+  return <div style={{ maxWidth: narrow ? 860 : 1280, margin: '0 auto', padding: '0 clamp(20px, 5vw, 64px)' }}>{children}</div>;
 }
 
 function VAEyebrow({ children, color = VA_TOKENS.blue }) {
@@ -28,22 +42,42 @@ function VAEyebrow({ children, color = VA_TOKENS.blue }) {
 }
 
 function VAHeader({ density }) {
+  const bp = useBP();
+  const isMobile = bp === 'mobile';
   return (
     <header style={{
       borderBottom: `1px solid ${VA_TOKENS.line}`, background: VA_TOKENS.bg,
       position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'saturate(150%) blur(8px)',
     }}>
       <VAContainer>
-        <div style={{ height: density === 'compact' ? 56 : 64, display: 'flex', alignItems: 'center', gap: 32 }}>
+        <div style={{
+          height: density === 'compact' ? 56 : 64,
+          display: 'flex', alignItems: 'center',
+          gap: isMobile ? 12 : 32,
+          minWidth: 0,
+        }}>
           <a
             href="#top"
             onClick={(e) => { e.preventDefault(); window.scrollTo(0, 0); }}
             aria-label="Back to top"
-            style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 0, cursor: 'pointer' }}
+            style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 0, cursor: 'pointer', flexShrink: 0 }}
           >
-            <img src="logo-primary-light.svg" alt="Shopview" style={{ height: 22 }} />
+            <img src="logo-primary-light.svg" alt="Shopview" style={{ height: isMobile ? 18 : 22 }} />
           </a>
-          <nav style={{ display: 'flex', gap: 24, marginLeft: 'auto', fontSize: 13, color: VA_TOKENS.muted, fontWeight: 500 }}>
+          <nav
+            className="sv-nav-strip"
+            style={{
+              display: 'flex',
+              gap: isMobile ? 16 : 24,
+              marginLeft: 'auto',
+              fontSize: 13, color: VA_TOKENS.muted, fontWeight: 500,
+              minWidth: 0,
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
+              WebkitOverflowScrolling: 'touch',
+              ...(isMobile ? { flex: 1, scrollbarWidth: 'none', msOverflowStyle: 'none' } : {}),
+              ...(isMobile ? { maskImage: 'linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent)' } : {}),
+            }}>
             <a style={{ color: 'inherit' }} href="#logo">Logo</a>
             <a style={{ color: 'inherit' }} href="#color">Color</a>
             <a style={{ color: 'inherit' }} href="#type">Type</a>
@@ -52,7 +86,9 @@ function VAHeader({ density }) {
             <a style={{ color: 'inherit' }} href="#components">Components</a>
             <a style={{ color: 'inherit' }} href="#ai-agent">AI Agent</a>
           </nav>
-          <span style={{ fontSize: 12, color: VA_TOKENS.soft, fontFamily: 'var(--sv-font-mono)' }}>v1.0 · May 2026</span>
+          {!isMobile && (
+            <span style={{ fontSize: 12, color: VA_TOKENS.soft, fontFamily: 'var(--sv-font-mono)' }}>v1.0 · May 2026</span>
+          )}
         </div>
       </VAContainer>
     </header>
@@ -211,13 +247,13 @@ function VAHeroSearch() {
 
 function VAHero() {
   return (
-    <section style={{ padding: '120px 0 96px', background: VA_TOKENS.bg }}>
+    <section style={{ padding: 'clamp(48px, 8vw, 120px) 0 clamp(48px, 7vw, 96px)', background: VA_TOKENS.bg }}>
       <VAContainer>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 64, alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(32px, 5vw, 64px)', alignItems: 'center' }}>
           <div>
             <VAEyebrow>Shopview Design System · Edition 01</VAEyebrow>
             <h1 style={{
-              fontFamily: 'var(--sv-font-display)', fontSize: 88, lineHeight: 0.96,
+              fontFamily: 'var(--sv-font-display)', fontSize: 'clamp(40px, 9vw, 88px)', lineHeight: 0.96,
               fontWeight: 700, letterSpacing: '-0.035em', color: VA_TOKENS.ink, margin: '24px 0 0',
               textWrap: 'balance',
             }}>
@@ -226,7 +262,7 @@ function VAHero() {
               <em style={{ fontStyle: 'italic', fontWeight: 700, color: VA_TOKENS.blue }}>shop floor.</em>
             </h1>
             <p style={{
-              fontSize: 19, lineHeight: 1.55, color: VA_TOKENS.muted, marginTop: 32, maxWidth: 560,
+              fontSize: 'clamp(15px, 1.6vw, 19px)', lineHeight: 1.55, color: VA_TOKENS.muted, marginTop: 'clamp(20px, 3vw, 32px)', maxWidth: 560,
               textWrap: 'pretty',
             }}>
               A reference document for the visual and verbal language of Shopview - built for the people who service semi-trucks, tractors, trailers, and fleet vehicles. Functional, not friendly. Direct, not decorative.
@@ -241,14 +277,14 @@ function VAHero() {
 
 function VASectionHead({ n, kicker, title, lede, id }) {
   return (
-    <div id={id} style={{ paddingTop: 96, paddingBottom: 32 }}>
+    <div id={id} style={{ paddingTop: 'clamp(48px, 8vw, 96px)', paddingBottom: 'clamp(20px, 3vw, 32px)' }}>
       <VAContainer>
         <VAEyebrow>{n} · {kicker}</VAEyebrow>
         <h2 style={{
-          fontFamily: 'var(--sv-font-display)', fontSize: 56, lineHeight: 1.0,
+          fontFamily: 'var(--sv-font-display)', fontSize: 'clamp(28px, 5.5vw, 56px)', lineHeight: 1.0,
           fontWeight: 600, letterSpacing: '-0.025em', color: VA_TOKENS.ink, margin: '12px 0 0',
         }}>{title}</h2>
-        {lede && <p style={{ fontSize: 17, lineHeight: 1.6, color: VA_TOKENS.muted, margin: '20px 0 0', maxWidth: 640 }}>{lede}</p>}
+        {lede && <p style={{ fontSize: 'clamp(14px, 1.5vw, 17px)', lineHeight: 1.6, color: VA_TOKENS.muted, margin: 'clamp(14px, 2vw, 20px) 0 0', maxWidth: 640 }}>{lede}</p>}
       </VAContainer>
     </div>
   );
@@ -264,11 +300,11 @@ function VALogo() {
         <div>
           <div style={{
             background: VA_TOKENS.bgGrey, border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8,
-            padding: '80px 64px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 'clamp(40px, 8vw, 80px) clamp(24px, 5vw, 64px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <img src="logo-primary-light.svg" alt="Shopview wordmark" style={{ width: 420 }} />
+            <img src="logo-primary-light.svg" alt="Shopview wordmark" style={{ width: 'min(420px, 80%)' }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginTop: 16 }}>
               {[
                 { bg: VA_TOKENS.bg, label: 'On surface · #FFFFFF', note: 'Default' },
                 { bg: VA_TOKENS.bgGrey, label: 'On grey-25 · #F8FAFC', note: 'Subdued' },
@@ -373,10 +409,10 @@ function VAColor() {
           background: '#F2F3F5',
           border: `1px solid ${VA_TOKENS.line}`,
           borderRadius: 16,
-          padding: 40,
+          padding: 'clamp(20px, 4vw, 40px)',
           display: 'flex',
           flexDirection: 'column',
-          gap: 48,
+          gap: 'clamp(28px, 4vw, 48px)',
         }}>
           {groups.map(g => (
             <div key={g.label}>
@@ -389,7 +425,7 @@ function VAColor() {
                 color: VA_TOKENS.ink,
                 marginBottom: 20,
               }}>{g.label}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${g.cols}, 1fr)`, gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'clamp(12px, 2vw, 20px)' }}>
                 {g.swatches.map(s => <Swatch key={s.name} s={s} />)}
               </div>
             </div>
@@ -418,42 +454,46 @@ function VAType() {
       <VAContainer>
         <div>
           <div style={{
-            ...VA_CARD, padding: '64px 48px',
+            ...VA_CARD, padding: 'clamp(32px, 6vw, 64px) clamp(24px, 5vw, 48px)',
           }}>
-            <div style={{ fontFamily: 'var(--sv-font-display)', fontSize: 180, lineHeight: 0.9, fontWeight: 800, fontStyle: 'italic', letterSpacing: '-0.05em', color: VA_TOKENS.blue }}>Aa</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 96, marginTop: 32, paddingTop: 32, borderTop: `1px solid ${VA_TOKENS.line}` }}>
+            <div style={{ fontFamily: 'var(--sv-font-display)', fontSize: 'clamp(96px, 22vw, 180px)', lineHeight: 0.9, fontWeight: 800, fontStyle: 'italic', letterSpacing: '-0.05em', color: VA_TOKENS.blue }}>Aa</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'clamp(24px, 5vw, 96px)', marginTop: 32, paddingTop: 32, borderTop: `1px solid ${VA_TOKENS.line}` }}>
               <div>
                 <div style={{ fontSize: 12, color: VA_TOKENS.soft, fontFamily: 'var(--sv-font-mono)' }}>UI · 18pt</div>
-                <div style={{ fontFamily: 'var(--sv-font-ui)', fontSize: 48, fontWeight: 600, color: VA_TOKENS.ink, marginTop: 24 }}>Inter</div>
+                <div style={{ fontFamily: 'var(--sv-font-ui)', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 600, color: VA_TOKENS.ink, marginTop: 24 }}>Inter</div>
                 <div style={{ fontSize: 13, color: VA_TOKENS.muted, marginTop: 24 }}>The grotesque that runs every screen.</div>
               </div>
               <div>
                 <div style={{ fontSize: 12, color: VA_TOKENS.soft, fontFamily: 'var(--sv-font-mono)' }}>Display · 28pt</div>
-                <div style={{ fontFamily: 'var(--sv-font-display)', fontSize: 48, fontWeight: 700, color: VA_TOKENS.ink, marginTop: 24 }}>Inter Display</div>
+                <div style={{ fontFamily: 'var(--sv-font-display)', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 700, color: VA_TOKENS.ink, marginTop: 24 }}>Inter Display</div>
                 <div style={{ fontSize: 13, color: VA_TOKENS.muted, marginTop: 24 }}>For H1/H2 only - tighter aperture at scale.</div>
               </div>
             </div>
           </div>
           <div style={{ marginTop: 24, ...VA_CARD, overflow: 'hidden' }}>
-            {scale.map(([n, w, lh, use], i) => (
-              <div key={n} style={{
-                display: 'grid', gridTemplateColumns: '80px 1fr 140px 120px 1fr',
-                alignItems: 'baseline', gap: 24, padding: '20px 28px',
-                borderTop: i ? `1px solid ${VA_TOKENS.line}` : 'none',
-              }}>
-                <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.blue }}>{n}</div>
-                <div style={{
-                  fontFamily: i < 2 ? 'var(--sv-font-display)' : 'var(--sv-font-ui)',
-                  fontSize: parseInt(lh.split('/')[0]),
-                  lineHeight: `${parseInt(lh.split('/')[1])}px`,
-                  fontWeight: parseInt(w.split(' ')[1]),
-                  color: VA_TOKENS.ink,
-                }}>Fleet service & repairs</div>
-                <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{w}</div>
-                <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{lh}</div>
-                <div style={{ fontSize: 12, color: VA_TOKENS.muted }}>{use}</div>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ minWidth: 560 }}>
+                {scale.map(([n, w, lh, use], i) => (
+                  <div key={n} style={{
+                    display: 'grid', gridTemplateColumns: '80px 1fr 140px 120px 1fr',
+                    alignItems: 'baseline', gap: 24, padding: '20px 28px',
+                    borderTop: i ? `1px solid ${VA_TOKENS.line}` : 'none',
+                  }}>
+                    <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.blue }}>{n}</div>
+                    <div style={{
+                      fontFamily: i < 2 ? 'var(--sv-font-display)' : 'var(--sv-font-ui)',
+                      fontSize: parseInt(lh.split('/')[0]),
+                      lineHeight: `${parseInt(lh.split('/')[1])}px`,
+                      fontWeight: parseInt(w.split(' ')[1]),
+                      color: VA_TOKENS.ink,
+                    }}>Fleet service & repairs</div>
+                    <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{w}</div>
+                    <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{lh}</div>
+                    <div style={{ fontSize: 12, color: VA_TOKENS.muted }}>{use}</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </VAContainer>
@@ -480,7 +520,7 @@ function VASpacing() {
       <VASectionHead n="04" id="space" kicker="Grid & Geometry" title="Built on a 4-pixel grid."
         lede="Every spacing token is a multiple of 4. Radii follow the same logic - 8px is the workhorse." />
       <VAContainer>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
             <div style={{ ...VA_CARD, padding: 28 }}>
               <h3 style={{ fontSize: 16, fontWeight: 600, color: VA_TOKENS.ink, margin: '0 0 20px' }}>Spacing scale</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -580,13 +620,13 @@ function VAIcons() {
         <div style={{
           background: '#F2F3F5', border: `1px solid ${VA_TOKENS.line}`,
           borderRadius: 16, overflow: 'hidden',
-          display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 340,
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', minHeight: 340,
         }}>
 
           {/* Left: info panel */}
-          <div style={{ padding: '52px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: 'clamp(28px, 5vw, 52px)', display: 'flex', flexDirection: 'column' }}>
             <div style={{
-              fontFamily: 'var(--sv-font-display)', fontSize: 42, fontWeight: 700,
+              fontFamily: 'var(--sv-font-display)', fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 700,
               color: VA_TOKENS.ink, lineHeight: 1.04, letterSpacing: '-0.028em',
             }}>UI Icons</div>
 
@@ -622,10 +662,12 @@ function VAIcons() {
             backgroundImage: 'radial-gradient(circle, rgba(154,164,178,0.35) 1px, transparent 1px)',
             backgroundSize: '22px 22px',
             borderLeft: `1px solid ${VA_TOKENS.line}`,
-            padding: '52px 48px',
+            padding: 'clamp(24px, 5vw, 52px) clamp(20px, 4vw, 48px)',
             display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
-            gap: GAP, overflow: 'visible',
+            gap: GAP,
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
           }}>
             {SIZES.map((sz, si) => (
               <div key={sz} style={{ display: 'grid', gridTemplateColumns: gridCols, gap: GAP, alignItems: 'center', overflow: 'visible' }}>
@@ -669,6 +711,8 @@ function VAIcons() {
 
 // Buttons comprehensive showcase
 function VAButtonsShowcase() {
+  const bp = useBP();
+  const isMobile = bp === 'mobile';
   const baseBtn = {
     borderRadius: 8, fontWeight: 600, display: 'inline-flex', alignItems: 'center',
     justifyContent: 'center', gap: 6, fontFamily: 'var(--sv-font-ui)', border: '1px solid transparent',
@@ -761,55 +805,84 @@ function VAButtonsShowcase() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
 
-      {/* ── Variant × State table ── */}
-      <div style={{ border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8, overflow: 'hidden' }}>
-        {/* thead */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '160px repeat(4, 1fr)',
-          background: VA_TOKENS.bgGrey, borderBottom: `1px solid ${VA_TOKENS.line}`,
-        }}>
-          <div style={{ padding: '10px 18px' }}><ColHead>Variant</ColHead></div>
-          {stateHeads.map(h => (
-            <div key={h} style={{ padding: '10px 18px', borderLeft: `1px solid ${VA_TOKENS.line}` }}>
-              <ColHead>{h}</ColHead>
-            </div>
-          ))}
-        </div>
-        {/* rows */}
-        {variantRows.map((row, ri) => (
-          <div key={row.name} style={{
+      {/* ── Variant × State matrix ── desktop: table · mobile: stacked cards */}
+      {!isMobile && (
+        <div style={{ border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8, overflow: 'hidden' }}>
+          {/* thead */}
+          <div style={{
             display: 'grid', gridTemplateColumns: '160px repeat(4, 1fr)',
-            borderTop: ri > 0 ? `1px solid ${VA_TOKENS.line}` : 'none',
+            background: VA_TOKENS.bgGrey, borderBottom: `1px solid ${VA_TOKENS.line}`,
           }}>
-            {/* variant label */}
-            <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: VA_TOKENS.ink }}>{row.name}</span>
-              <span style={{ fontSize: 11, color: VA_TOKENS.soft }}>{row.note}</span>
-            </div>
-            {/* state cells */}
-            {row.states.map((s, si) => (
-              <div key={si} style={{
-                padding: '18px',
-                borderLeft: `1px solid ${VA_TOKENS.line}`,
-                background: si === 3 ? VA_TOKENS.bgGrey : '#fff',
-                display: 'flex', alignItems: 'center',
-              }}>
-                <button disabled={s.dim} style={{
-                  ...baseBtn,
-                  background: s.bg,
-                  color: s.color,
-                  borderColor: s.borderColor,
-                  boxShadow: s.shadow || 'none',
-                  cursor: s.dim ? 'not-allowed' : 'pointer',
-                }}>Button</button>
+            <div style={{ padding: '10px 18px' }}><ColHead>Variant</ColHead></div>
+            {stateHeads.map(h => (
+              <div key={h} style={{ padding: '10px 18px', borderLeft: `1px solid ${VA_TOKENS.line}` }}>
+                <ColHead>{h}</ColHead>
               </div>
             ))}
           </div>
-        ))}
-      </div>
+          {/* rows */}
+          {variantRows.map((row, ri) => (
+            <div key={row.name} style={{
+              display: 'grid', gridTemplateColumns: '160px repeat(4, 1fr)',
+              borderTop: ri > 0 ? `1px solid ${VA_TOKENS.line}` : 'none',
+            }}>
+              {/* variant label */}
+              <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: VA_TOKENS.ink }}>{row.name}</span>
+                <span style={{ fontSize: 11, color: VA_TOKENS.soft }}>{row.note}</span>
+              </div>
+              {/* state cells */}
+              {row.states.map((s, si) => (
+                <div key={si} style={{
+                  padding: '18px',
+                  borderLeft: `1px solid ${VA_TOKENS.line}`,
+                  background: si === 3 ? VA_TOKENS.bgGrey : '#fff',
+                  display: 'flex', alignItems: 'center',
+                }}>
+                  <button disabled={s.dim} style={{
+                    ...baseBtn,
+                    background: s.bg,
+                    color: s.color,
+                    borderColor: s.borderColor,
+                    boxShadow: s.shadow || 'none',
+                    cursor: s.dim ? 'not-allowed' : 'pointer',
+                  }}>Button</button>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+      {isMobile && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {variantRows.map(row => (
+            <div key={row.name} style={{ border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8, overflow: 'hidden' }}>
+              <div style={{ padding: '14px 16px', background: VA_TOKENS.bgGrey, borderBottom: `1px solid ${VA_TOKENS.line}` }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: VA_TOKENS.ink }}>{row.name}</div>
+                <div style={{ fontSize: 11, color: VA_TOKENS.soft, marginTop: 2 }}>{row.note}</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: VA_TOKENS.line }}>
+                {row.states.map((s, si) => (
+                  <div key={si} style={{ padding: '14px', background: si === 3 ? VA_TOKENS.bgGrey : '#fff', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+                    <span style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{stateHeads[si]}</span>
+                    <button disabled={s.dim} style={{
+                      ...baseBtn,
+                      background: s.bg,
+                      color: s.color,
+                      borderColor: s.borderColor,
+                      boxShadow: s.shadow || 'none',
+                      cursor: s.dim ? 'not-allowed' : 'pointer',
+                    }}>Button</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ── Sizes ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
         {sizes.map(sz => (
           <div key={sz.label} style={{ ...VA_CARD, padding: '20px 22px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
@@ -841,7 +914,7 @@ function VAButtonsShowcase() {
       </div>
 
       {/* ── Split buttons ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
         {splitVariants.map(sv => (
           <div key={sv.name}>
             <SubLabel>{sv.name}</SubLabel>
@@ -933,7 +1006,7 @@ function VAFloatInput({ label, defaultValue = '', type = 'text', error, hint, di
 function VAInputsShowcase() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px 24px' }}>
         <VAFloatInput label="Lead Technician" defaultValue="Aaron Keating" />
         <VAFloatInput label="Service Advisor" />
         <VAFloatInput label="Phone" type="tel" defaultValue="(555) 555" error="Enter a complete phone number." />
@@ -944,7 +1017,7 @@ function VAInputsShowcase() {
       <div style={{ height: 1, background: VA_TOKENS.line }} />
       <div>
         <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 }}>Dropdown</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px 24px' }}>
           <VAFloatInput label="Category*" isSelect />
           <VAFloatInput label="Category*" defaultValue="Hard Parts" isSelect />
           <VAFloatInput label="Category*" isSelect error="This field is required." />
@@ -956,6 +1029,8 @@ function VAInputsShowcase() {
 }
 
 function VABadgesShowcase() {
+  const bp = useBP();
+  const isMobile = bp === 'mobile';
   const badgeBase = {
     fontFamily: 'var(--sv-font-ui)', fontWeight: 500, fontSize: 11,
     lineHeight: '11px', padding: '2px 8px', display: 'inline-flex',
@@ -969,39 +1044,75 @@ function VABadgesShowcase() {
     { name: 'Neutral', bordered: { background: '#EEF2F6', border: '1px solid #CDD5DF', color: '#373A41' }, solid: { background: '#EEF2F6', color: '#364152' } },
   ];
   const colHeads = ['Rounded · Border', 'Rounded · Solid', 'Square · Border', 'Square · Solid', 'Location'];
+  const LocationBadge = () => (
+    <span style={{ background: '#fff', border: '1px solid #D5D7DA', color: '#364152', borderRadius: 8, padding: '2px 4px 2px 8px', height: 24, fontWeight: 600, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 8, boxSizing: 'border-box' }}>
+      Storage <span style={{ background: '#fff', border: '1px solid #D5D7DA', borderRadius: 8, padding: '0 6px', height: 16, color: '#414651', fontWeight: 500, fontSize: 11, lineHeight: '16px', display: 'inline-flex', alignItems: 'center' }}>4</span>
+    </span>
+  );
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Grid table */}
-      <div style={{ border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(4, 1fr) 120px', background: VA_TOKENS.bgGrey, borderBottom: `1px solid ${VA_TOKENS.line}` }}>
-          <div style={{ padding: '9px 14px' }} />
-          {colHeads.map((h, i) => (
-            <div key={h} style={{ padding: '9px 14px', borderLeft: `1px solid ${VA_TOKENS.line}`, fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{h}</div>
+      {/* Desktop: grid table */}
+      {!isMobile && (
+        <div style={{ border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(4, 1fr) 120px', background: VA_TOKENS.bgGrey, borderBottom: `1px solid ${VA_TOKENS.line}` }}>
+            <div style={{ padding: '9px 14px' }} />
+            {colHeads.map((h, i) => (
+              <div key={h} style={{ padding: '9px 14px', borderLeft: `1px solid ${VA_TOKENS.line}`, fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{h}</div>
+            ))}
+          </div>
+          {tones.map((t, ti) => (
+            <div key={t.name} style={{ display: 'grid', gridTemplateColumns: '80px repeat(4, 1fr) 120px', borderTop: ti > 0 ? `1px solid ${VA_TOKENS.line}` : 'none' }}>
+              <div style={{ padding: '14px', display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, color: VA_TOKENS.muted }}>{t.name}</div>
+              {[
+                { ...badgeBase, borderRadius: 9999, ...t.bordered },
+                { ...badgeBase, borderRadius: 9999, ...t.solid },
+                { ...badgeBase, borderRadius: 8, ...t.bordered },
+                { ...badgeBase, borderRadius: 8, ...t.solid },
+              ].map((style, i) => (
+                <div key={i} style={{ padding: '14px', borderLeft: `1px solid ${VA_TOKENS.line}`, display: 'flex', alignItems: 'center' }}>
+                  <span style={style}>Label text</span>
+                </div>
+              ))}
+              <div style={{ padding: '14px', borderLeft: `1px solid ${VA_TOKENS.line}`, display: 'flex', alignItems: 'center' }}>
+                {t.location && <LocationBadge />}
+              </div>
+            </div>
           ))}
         </div>
-        {tones.map((t, ti) => (
-          <div key={t.name} style={{ display: 'grid', gridTemplateColumns: '80px repeat(4, 1fr) 120px', borderTop: ti > 0 ? `1px solid ${VA_TOKENS.line}` : 'none' }}>
-            <div style={{ padding: '14px', display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, color: VA_TOKENS.muted }}>{t.name}</div>
-            {[
-              { ...badgeBase, borderRadius: 9999, ...t.bordered },
-              { ...badgeBase, borderRadius: 9999, ...t.solid },
-              { ...badgeBase, borderRadius: 8, ...t.bordered },
-              { ...badgeBase, borderRadius: 8, ...t.solid },
-            ].map((style, i) => (
-              <div key={i} style={{ padding: '14px', borderLeft: `1px solid ${VA_TOKENS.line}`, display: 'flex', alignItems: 'center' }}>
-                <span style={style}>Label text</span>
+      )}
+
+      {/* Mobile: per-tone cards */}
+      {isMobile && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {tones.map(t => {
+            const variants = [
+              { label: 'Rounded · Border', style: { ...badgeBase, borderRadius: 9999, ...t.bordered } },
+              { label: 'Rounded · Solid',  style: { ...badgeBase, borderRadius: 9999, ...t.solid    } },
+              { label: 'Square · Border',  style: { ...badgeBase, borderRadius: 8,    ...t.bordered } },
+              { label: 'Square · Solid',   style: { ...badgeBase, borderRadius: 8,    ...t.solid    } },
+            ];
+            return (
+              <div key={t.name} style={{ border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8, overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', background: VA_TOKENS.bgGrey, borderBottom: `1px solid ${VA_TOKENS.line}`, fontSize: 13, fontWeight: 600, color: VA_TOKENS.ink }}>{t.name}</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {variants.map((v, vi) => (
+                    <div key={vi} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderTop: vi > 0 ? `1px solid ${VA_TOKENS.line}` : 'none' }}>
+                      <span style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{v.label}</span>
+                      <span style={v.style}>Label text</span>
+                    </div>
+                  ))}
+                  {t.location && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderTop: `1px solid ${VA_TOKENS.line}` }}>
+                      <span style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Location</span>
+                      <LocationBadge />
+                    </div>
+                  )}
+                </div>
               </div>
-            ))}
-            <div style={{ padding: '14px', borderLeft: `1px solid ${VA_TOKENS.line}`, display: 'flex', alignItems: 'center' }}>
-              {t.location && (
-                <span style={{ background: '#fff', border: '1px solid #D5D7DA', color: '#364152', borderRadius: 8, padding: '2px 4px 2px 8px', height: 24, fontWeight: 600, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 8, boxSizing: 'border-box' }}>
-                  Storage <span style={{ background: '#fff', border: '1px solid #D5D7DA', borderRadius: 8, padding: '0 6px', height: 16, color: '#414651', fontWeight: 500, fontSize: 11, lineHeight: '16px', display: 'inline-flex', alignItems: 'center' }}>4</span>
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
     </div>
   );
@@ -1164,7 +1275,7 @@ function VANotificationsShowcase() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <div>
         <SubLabel>Toast · Full (400 × auto)</SubLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           {toasts.map(t => (
             <div key={t.tone} style={{ ...toastCard, padding: 16, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <div style={{ width: 40, height: 40, flexShrink: 0, borderRadius: 9999, background: t.iconBg, color: t.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t.icon}</div>
@@ -1248,12 +1359,14 @@ function VAPillTabs({ tabs, value, onChange }) {
 // 07. Components
 function VAComponents() {
   const [tab, setTab] = React.useState('lines');
+  const bp = useBP();
+  const isMobile = bp === 'mobile';
   return (
     <section>
       <VASectionHead n="06" id="components" kicker="Component Library" title="Twelve primitives. One blue."
         lede="Every screen reduces to a small set of primitives. Reuse aggressively. Build new ones only when the existing set truly doesn't cover the case." />
       <VAContainer>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)', gap: 16 }}>
             {/* Buttons */}
             <div style={{ gridColumn: 'span 12', ...VA_CARD, padding: 28 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -1418,7 +1531,7 @@ function VAFiltersBlock() {
       <div>
         <RowLabel>Chip states</RowLabel>
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10,
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10,
           padding: 16, background: VA_TOKENS.bgGrey, borderRadius: 8,
           border: `1px solid ${VA_TOKENS.line}`,
         }}>
@@ -1456,7 +1569,7 @@ function VAFiltersBlock() {
       {/* Dropdowns */}
       <div>
         <RowLabel>Dropdowns</RowLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           <div style={{
             padding: 24, background: VA_TOKENS.bgGrey,
             border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8,
@@ -1590,7 +1703,7 @@ function VAAIAgent() {
           <div style={{ height: 1, background: VA_TOKENS.line }} />
 
           {/* States + In context */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(28px, 4vw, 48px)' }}>
 
             {/* States */}
             <div>
@@ -1695,9 +1808,9 @@ function VAAIAgent() {
 
 function VAFooter() {
   return (
-    <footer style={{ marginTop: 96, padding: '64px 0', borderTop: `1px solid ${VA_TOKENS.line}`, background: VA_TOKENS.bgGrey }}>
+    <footer style={{ marginTop: 'clamp(56px, 8vw, 96px)', padding: 'clamp(40px, 6vw, 64px) 0', borderTop: `1px solid ${VA_TOKENS.line}`, background: VA_TOKENS.bgGrey }}>
       <VAContainer>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <img src="logo-primary-light.svg" alt="Shopview" style={{ height: 18 }} />
           <span style={{ fontSize: 12, color: VA_TOKENS.soft, fontFamily: 'var(--sv-font-mono)' }}>Shopview Design System · Edition 01 · May 2026</span>
         </div>
