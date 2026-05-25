@@ -35,7 +35,14 @@ function VAHeader({ density }) {
     }}>
       <VAContainer>
         <div style={{ height: density === 'compact' ? 56 : 64, display: 'flex', alignItems: 'center', gap: 32 }}>
-          <img src="logo-primary-light.svg" alt="Shopview" style={{ height: 22 }} />
+          <a
+            href="#top"
+            onClick={(e) => { e.preventDefault(); window.scrollTo(0, 0); }}
+            aria-label="Back to top"
+            style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 0, cursor: 'pointer' }}
+          >
+            <img src="logo-primary-light.svg" alt="Shopview" style={{ height: 22 }} />
+          </a>
           <nav style={{ display: 'flex', gap: 24, marginLeft: 'auto', fontSize: 13, color: VA_TOKENS.muted, fontWeight: 500 }}>
             <a style={{ color: 'inherit' }} href="#logo">Logo</a>
             <a style={{ color: 'inherit' }} href="#color">Color</a>
