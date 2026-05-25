@@ -50,6 +50,7 @@ function VAHeader({ density }) {
             <a style={{ color: 'inherit' }} href="#space">Space</a>
             <a style={{ color: 'inherit' }} href="#icons">Icons</a>
             <a style={{ color: 'inherit' }} href="#components">Components</a>
+            <a style={{ color: 'inherit' }} href="#ai-agent">AI Agent</a>
           </nav>
           <span style={{ fontSize: 12, color: VA_TOKENS.soft, fontFamily: 'var(--sv-font-mono)' }}>v1.0 · May 2026</span>
         </div>
@@ -1537,6 +1538,161 @@ function VANotice({ tone, text }) {
 
 
 
+// 07. AI Agent Icon
+function VAAIAgent() {
+  const [demoState, setDemoState] = React.useState('idle');
+  const AGENT_GRAD = 'linear-gradient(135deg, #7c3aed, #db2777)';
+  const [iconPillSize, setIconPillSize] = React.useState(28);
+  const textPillRef = React.useRef(null);
+  React.useLayoutEffect(() => {
+    if (textPillRef.current) setIconPillSize(textPillRef.current.offsetHeight);
+  }, []);
+
+  function AIIcon({ size = 24, color = VA_TOKENS.ink, state = 'idle' }) {
+    const containerRef = React.useRef(null);
+    React.useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+      let icon = container.querySelector('ai-agent-icon');
+      if (!icon) {
+        icon = document.createElement('ai-agent-icon');
+        container.appendChild(icon);
+      }
+      icon.setAttribute('size', String(size));
+      icon.setAttribute('color', color);
+      icon.setAttribute('state', state);
+    });
+    return <span ref={containerRef} style={{ display: 'inline-flex', lineHeight: 0 }}></span>;
+  }
+
+  const sizes = [16, 24, 32, 48, 64, 96];
+
+  return (
+    <section>
+      <VASectionHead n="07" id="ai-agent" kicker="AI Agent" title="One icon. Two states."
+        lede="A self-contained animated web component with a gear-cog body and two eyes. Hover triggers a one-shot spin. Thinking state runs a continuous loop with eye pulse." />
+      <VAContainer>
+        <div style={{ ...VA_CARD, padding: 28, display: 'flex', flexDirection: 'column', gap: 28 }}>
+
+          {/* Sizes */}
+          <div>
+            <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 20 }}>Sizes</div>
+            <div style={{ display: 'flex', gap: 32, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              {sizes.map(s => (
+                <div key={s} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+                  <AIIcon size={s} color={VA_TOKENS.ink} state="idle" />
+                  <span style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, color: VA_TOKENS.soft }}>{s}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ height: 1, background: VA_TOKENS.line }} />
+
+          {/* States + In context */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+
+            {/* States */}
+            <div>
+              <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 20 }}>States</div>
+              <div style={{ display: 'flex', gap: 48, alignItems: 'flex-start' }}>
+                {[
+                  { s: 'idle',     note: 'hover-spin · random blink' },
+                  { s: 'thinking', note: 'continuous spin · eye pulse' },
+                ].map(({ s, note }) => (
+                  <div key={s} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                    <AIIcon size={52} color={VA_TOKENS.ink} state={s} />
+                    <span style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.blue }}>{s}</span>
+                    <span style={{ fontSize: 11, color: VA_TOKENS.soft, textAlign: 'center', maxWidth: 110, lineHeight: 1.5 }}>{note}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Live toggle */}
+              <div style={{ marginTop: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
+                {['idle', 'thinking'].map(s => (
+                  <button key={s} onClick={() => setDemoState(s)} style={{
+                    height: 28, padding: '0 12px',
+                    border: `1px solid ${demoState === s ? VA_TOKENS.blue : VA_TOKENS.line}`,
+                    background: demoState === s ? '#E9F5FF' : 'transparent',
+                    borderRadius: 6,
+                    fontFamily: 'var(--sv-font-mono)', fontSize: 11,
+                    color: demoState === s ? VA_TOKENS.blue : VA_TOKENS.muted,
+                    cursor: 'pointer', transition: 'all 120ms ease',
+                  }}>{s}</button>
+                ))}
+                <span style={{ marginLeft: 4 }}>
+                  <AIIcon size={26} color={VA_TOKENS.ink} state={demoState} />
+                </span>
+              </div>
+            </div>
+
+            {/* In context */}
+            <div>
+              <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 10, fontWeight: 700, color: VA_TOKENS.soft, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 20 }}>In context</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+                {/* Icon buttons */}
+                <div>
+                  <div style={{ fontSize: 11, color: VA_TOKENS.soft, marginBottom: 10 }}>Icon button</div>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    {[
+                      { bg: VA_TOKENS.bgGrey, border: `1px solid ${VA_TOKENS.line}`, color: VA_TOKENS.ink, label: 'light' },
+                      { bg: '#202939',        border: `1px solid #364152`,           color: '#ffffff',     label: 'dark' },
+                      { bg: AGENT_GRAD,       border: 'none',                        color: '#ffffff',     label: 'brand' },
+                    ].map(({ bg, border, color, label }) => (
+                      <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 999, background: bg, border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <AIIcon size={20} color={color} />
+                        </div>
+                        <span style={{ fontSize: 10, color: VA_TOKENS.soft, fontFamily: 'var(--sv-font-mono)' }}>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pills */}
+                <div>
+                  <div style={{ fontSize: 11, color: VA_TOKENS.soft, marginBottom: 10 }}>Pill</div>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <div ref={textPillRef} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 12px', background: VA_TOKENS.bgGrey, border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8 }}>
+                      <AIIcon size={14} color={VA_TOKENS.muted} />
+                      <span style={{ fontSize: 13, fontWeight: 500, color: VA_TOKENS.muted, fontFamily: 'var(--sv-font-ui)' }}>AI Agent</span>
+                    </div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: iconPillSize, height: iconPillSize, background: VA_TOKENS.bgGrey, border: `1px solid ${VA_TOKENS.line}`, borderRadius: 8 }}>
+                      <AIIcon size={14} color={VA_TOKENS.muted} />
+                    </div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 12px', background: AGENT_GRAD, borderRadius: 8 }}>
+                      <AIIcon size={14} color="#ffffff" state="thinking" />
+                      <span style={{ fontSize: 13, fontWeight: 500, color: '#fff', fontFamily: 'var(--sv-font-ui)' }}>Thinking…</span>
+                    </div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: iconPillSize, height: iconPillSize, background: AGENT_GRAD, borderRadius: 8 }}>
+                      <AIIcon size={14} color="#ffffff" state="thinking" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* FAB */}
+                <div>
+                  <div style={{ fontSize: 11, color: VA_TOKENS.soft, marginBottom: 10 }}>FAB · 48×48 · radius-lg</div>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <div style={{ width: 48, height: 48, background: VA_TOKENS.bgGrey, border: `1px solid ${VA_TOKENS.line}`, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(15,17,26,0.08)' }}>
+                      <AIIcon size={24} color={VA_TOKENS.ink} />
+                    </div>
+                    <div style={{ width: 48, height: 48, background: AGENT_GRAD, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(124,58,237,0.28)' }}>
+                      <AIIcon size={24} color="#ffffff" state="thinking" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </VAContainer>
+    </section>
+  );
+}
+
 function VAFooter() {
   return (
     <footer style={{ marginTop: 96, padding: '64px 0', borderTop: `1px solid ${VA_TOKENS.line}`, background: VA_TOKENS.bgGrey }}>
@@ -1564,6 +1720,7 @@ function VariationA({ density = 'comfortable' }) {
       <VASpacing />
       <VAIcons />
       <VAComponents />
+      <VAAIAgent />
       <VAFooter />
     </div>
   );
