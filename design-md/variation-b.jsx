@@ -560,7 +560,7 @@ function ConstructionFrame({ size, children }) {
 function VAIcons() {
   const iconShowcase = [
     { name: 'Done',       file: '../preview/icons/fig-check-verified.svg' },
-    { name: 'Asset',      file: '../preview/icons/asset-20.svg' },
+    { name: 'Asset',      file: '../preview/icons/truck-20.svg' },
     { name: 'Work Order', file: '../preview/icons/work-order-20.svg' },
     { name: 'Clock In',   file: '../preview/icons/fig-clock.svg' },
     { name: 'Technician', file: '../preview/icons/tool-16.svg' },
