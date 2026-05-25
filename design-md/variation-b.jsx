@@ -438,6 +438,8 @@ function VAColor() {
 
 // 04. Typography
 function VAType() {
+  const bp = useBP();
+  const isMobile = bp === 'mobile';
   const scale = [
     ['H1', 'Display 600', '30 / 38', 'Page titles'],
     ['H2', 'Display 600', '24 / 32', 'Section titles'],
@@ -471,29 +473,58 @@ function VAType() {
             </div>
           </div>
           <div style={{ marginTop: 24, ...VA_CARD, overflow: 'hidden' }}>
-            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ minWidth: 560 }}>
+            {!isMobile && (
+              <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <div style={{ minWidth: 560 }}>
+                  {scale.map(([n, w, lh, use], i) => (
+                    <div key={n} style={{
+                      display: 'grid', gridTemplateColumns: '80px 1fr 140px 120px 1fr',
+                      alignItems: 'baseline', gap: 24, padding: '20px 28px',
+                      borderTop: i ? `1px solid ${VA_TOKENS.line}` : 'none',
+                    }}>
+                      <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.blue }}>{n}</div>
+                      <div style={{
+                        fontFamily: i < 2 ? 'var(--sv-font-display)' : 'var(--sv-font-ui)',
+                        fontSize: parseInt(lh.split('/')[0]),
+                        lineHeight: `${parseInt(lh.split('/')[1])}px`,
+                        fontWeight: parseInt(w.split(' ')[1]),
+                        color: VA_TOKENS.ink,
+                      }}>Fleet service & repairs</div>
+                      <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{w}</div>
+                      <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{lh}</div>
+                      <div style={{ fontSize: 12, color: VA_TOKENS.muted }}>{use}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {isMobile && (
+              <div>
                 {scale.map(([n, w, lh, use], i) => (
                   <div key={n} style={{
-                    display: 'grid', gridTemplateColumns: '80px 1fr 140px 120px 1fr',
-                    alignItems: 'baseline', gap: 24, padding: '20px 28px',
+                    display: 'flex', flexDirection: 'column', gap: 6,
+                    padding: '16px 20px',
                     borderTop: i ? `1px solid ${VA_TOKENS.line}` : 'none',
                   }}>
-                    <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.blue }}>{n}</div>
+                    <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.blue, letterSpacing: '0.04em' }}>{n}</div>
                     <div style={{
                       fontFamily: i < 2 ? 'var(--sv-font-display)' : 'var(--sv-font-ui)',
                       fontSize: parseInt(lh.split('/')[0]),
                       lineHeight: `${parseInt(lh.split('/')[1])}px`,
                       fontWeight: parseInt(w.split(' ')[1]),
                       color: VA_TOKENS.ink,
-                    }}>Fleet service & repairs</div>
-                    <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{w}</div>
-                    <div style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{lh}</div>
-                    <div style={{ fontSize: 12, color: VA_TOKENS.muted }}>{use}</div>
+                    }}>Fleet service &amp; repairs</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'baseline', marginTop: 2 }}>
+                      <span style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{w}</span>
+                      <span style={{ color: VA_TOKENS.strongLine }}>·</span>
+                      <span style={{ fontFamily: 'var(--sv-font-mono)', fontSize: 11, color: VA_TOKENS.soft }}>{lh}</span>
+                      <span style={{ color: VA_TOKENS.strongLine }}>·</span>
+                      <span style={{ fontSize: 12, color: VA_TOKENS.muted }}>{use}</span>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </VAContainer>
