@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Shopview · design.md</title>
+<link rel="stylesheet" href="colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; }
+  body { font-family: var(--sv-font-ui); color: var(--sv-grey-700); }
+</style>
+<script>
+  history.scrollRestoration = 'manual';
+  function _toTop() { window.scrollTo({ top: 0, behavior: 'instant' }); }
+  _toTop();
+  document.addEventListener('DOMContentLoaded', _toTop);
+  window.addEventListener('load', function() {
+    _toTop();
+    requestAnimationFrame(function() { _toTop(); requestAnimationFrame(_toTop); });
+    setTimeout(_toTop, 300);
+    setTimeout(_toTop, 800);
+  });
+  try { localStorage.removeItem('dc-viewport:' + location.pathname); } catch {}
+</script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="../ui_kits/shopview-app/components.jsx"></script>
+<script type="text/babel" src="filter-chip.jsx"></script>
+<script type="text/babel" src="filter-dropdown.jsx"></script>
+<script type="text/babel" src="mobile-filters.jsx"></script>
+<script type="text/babel" src="filter-bar.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="variation-b.jsx?v=4"></script>
+
+<script type="text/babel">
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "density": "comfortable",
+    "theme": "light"
+  }/*EDITMODE-END*/;
+
+  function App() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+    return (
+      <React.Fragment>
+        <VariationA density={t.density} />
+        <TweaksPanel>
+          <TweakSection label="Display" />
+          <TweakRadio
+            label="Density"
+            value={t.density}
+            options={[
+              { value: 'comfortable', label: 'Comfortable' },
+              { value: 'compact', label: 'Compact' },
+            ]}
+            onChange={(v) => setTweak('density', v)}
+          />
+          <TweakRadio
+            label="Theme"
+            value={t.theme}
+            options={[
+              { value: 'light', label: 'Light' },
+              { value: 'dark', label: 'Dark · soon' },
+            ]}
+            onChange={(v) => setTweak('theme', v)}
+          />
+          <div style={{ fontSize: 11, color: 'rgba(41,38,27,0.55)', lineHeight: 1.5, marginTop: 4 }}>
+            Dark mode is wired in but not yet styled — we'll fill it in when the dark palette ships.
+          </div>
+        </TweaksPanel>
+      </React.Fragment>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
